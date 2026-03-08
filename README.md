@@ -73,6 +73,14 @@ Build a real `.npz` from local parquet episodes with embedded images:
 python scripts/build_real_npz.py --dataset-dir path/to/libero_train --output results/libero_real.npz --config-output results/libero_real_config.json
 ```
 
+Run the bundled real-data sample from GitHub:
+
+```bash
+python scripts/validate_npz.py --dataset sample_data/libero_real_sample.npz
+python scripts/run_experiment.py --config sample_data/libero_real_config.json --dataset-path sample_data/libero_real_sample.npz --output results/libero_real_run.json
+python scripts/run_multiseed.py --config sample_data/libero_real_config.json --dataset-path sample_data/libero_real_sample.npz --output results/libero_real_multiseed.json
+```
+
 ## Colab workflow
 
 1. Upload this folder to `/content/mcu_humanoid_colab`.
@@ -131,6 +139,8 @@ If you already have LeRobot-style parquet files with embedded images, the shorte
 3. run `scripts/run_experiment.py` or `scripts/run_multiseed.py` using the generated config
 
 The easiest local starting point in this workspace is `REAL/libero_train`, because it already contains image bytes inside the parquet rows.
+
+For quick tests directly from GitHub, use the bundled `sample_data/libero_real_sample.npz`.
 
 ## Safe paper claim
 
