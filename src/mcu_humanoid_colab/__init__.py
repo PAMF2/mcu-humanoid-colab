@@ -1,0 +1,1 @@
+"""MCU humanoid Colab package."""
