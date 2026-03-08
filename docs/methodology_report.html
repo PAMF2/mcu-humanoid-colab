@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MCU Humanoid Colab - Metodologia e Resultados</title>
+  <style>
+    :root {
+      --bg: #f5efe2;
+      --paper: #fffaf0;
+      --ink: #1b1a17;
+      --muted: #5a554d;
+      --line: #d9cdb8;
+      --accent: #0f766e;
+      --accent-soft: #d8f3ef;
+      --warn: #b45309;
+      --bad: #991b1b;
+      --good: #166534;
+      --shadow: 0 24px 60px rgba(38, 31, 20, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 22rem),
+        radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.12), transparent 24rem),
+        linear-gradient(180deg, #f7f2e8 0%, #f1e8d8 100%);
+    }
+
+    .page {
+      width: min(1120px, calc(100vw - 32px));
+      margin: 32px auto 56px;
+      background: rgba(255, 250, 240, 0.92);
+      border: 1px solid rgba(217, 205, 184, 0.8);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .hero {
+      padding: 48px 48px 32px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 50%),
+        linear-gradient(315deg, rgba(180, 83, 9, 0.08), transparent 50%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid rgba(15, 118, 110, 0.22);
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.08);
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      max-width: 860px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      padding: 28px 48px;
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .card p,
+    .card li {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    .card ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .section-title {
+      padding: 6px 48px 0;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-title p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      padding: 8px 48px 28px;
+    }
+
+    .step {
+      position: relative;
+      padding: 18px;
+      min-height: 148px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fffdf7 0%, #faf3e5 100%);
+    }
+
+    .step::after {
+      content: "->";
+      position: absolute;
+      top: 50%;
+      right: -11px;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    .step span {
+      display: block;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    table {
+      width: calc(100% - 96px);
+      margin: 8px 48px 0;
+      border-collapse: collapse;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    caption {
+      caption-side: top;
+      text-align: left;
+      padding: 0 0 12px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    th,
+    td {
+      padding: 16px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f6eddd;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 8px;
+      font-size: 12px;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+    }
+
+    .badge.good {
+      color: var(--good);
+      background: rgba(22, 101, 52, 0.08);
+    }
+
+    .badge.warn {
+      color: var(--warn);
+      background: rgba(180, 83, 9, 0.08);
+    }
+
+    .badge.bad {
+      color: var(--bad);
+      background: rgba(153, 27, 27, 0.08);
+    }
+
+    .callout {
+      margin: 22px 48px 0;
+      padding: 22px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      color: #113532;
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .footer {
+      padding: 28px 48px 40px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    code {
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(27, 26, 23, 0.06);
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 940px) {
+      .grid.cols-3,
+      .grid.cols-4,
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+
+      .step::after {
+        display: none;
+      }
+
+      .hero,
+      .grid,
+      .section-title,
+      .pipeline,
+      .footer {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      table,
+      .callout {
+        width: calc(100% - 44px);
+        margin-left: 22px;
+        margin-right: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">MCU Humanoid Colab</span>
+      <h1>Metodologia e Resultados</h1>
+      <p>
+        Este relatório descreve a metodologia usada para avaliar um pipeline de
+        <strong>retrieval multimodal</strong> com MCU em cenário embodied/humanoid.
+        O objetivo foi testar, de forma controlada, se recuperar <strong>skill chunks temporais</strong>
+        melhora robustez e taxa de sucesso em relação a recuperação instantânea baseada apenas em visão.
+      </p>
+    </section>
+
+    <section class="grid cols-3">
+      <article class="card">
+        <h2>Hipotese</h2>
+        <p>
+          <strong>Vision-only retrieval</strong> deve ser o pior baseline.
+          Adicionar <strong>propriocepcao, contato e fase</strong> deve trazer o maior salto.
+          Recuperar <strong>skill chunks</strong> deve aumentar consistencia e sucesso.
+        </p>
+      </article>
+      <article class="card">
+        <h2>Pergunta central</h2>
+        <p>
+          O ganho principal vem de um world model pequeno ou de uma memoria melhor indexada por
+          estado multimodal temporal?
+        </p>
+      </article>
+      <article class="card">
+        <h2>Resposta atual</h2>
+        <p>
+          Os resultados favorecem fortemente a segunda explicacao:
+          <strong>o ganho principal esta na memoria multimodal temporal</strong>.
+        </p>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <h2>Metodologia</h2>
+      <p>
+        O benchmark foi estruturado para introduzir ambiguidade visual, dinamica oculta e dependencia temporal,
+        mantendo o problema pequeno o suficiente para Colab.
+      </p>
+    </div>
+
+    <section class="pipeline">
+      <div class="step">
+        <strong>1. Episodios</strong>
+        <span>
+          Episodios sinteticos com horizonte <code>48</code>, comandos condicionados por skill,
+          fase de movimento, contato e estado latente.
+        </span>
+      </div>
+      <div class="step">
+        <strong>2. Observacao</strong>
+        <span>
+          Cada passo gera <code>vision</code>, <code>proprio</code>, <code>contact</code>,
+          <code>phase</code> e <code>command</code>.
+        </span>
+      </div>
+      <div class="step">
+        <strong>3. Memoria MCU</strong>
+        <span>
+          A memoria indexa chaves visuais, multimodais e historico temporal com
+          <code>history = 4</code> e <code>chunk_len = 6</code>.
+        </span>
+      </div>
+      <div class="step">
+        <strong>4. Ablacoes</strong>
+        <span>
+          Sao comparados quatro controladores: <code>vision_only</code>,
+          <code>multimodal_instant</code>, <code>chunk_only</code> e
+          <code>chunk_world_model</code>.
+        </span>
+      </div>
+      <div class="step">
+        <strong>5. Avaliacao</strong>
+        <span>
+          Medidas: <code>action_mse</code>, <code>state_mse</code>,
+          <code>success_rate</code> e <code>fall_rate</code>,
+          em multiplas seeds.
+        </span>
+      </div>
+    </section>
+
+    <section class="grid cols-4">
+      <article class="card">
+        <h3>Configuracao</h3>
+        <ul>
+          <li><code>train_episodes = 96</code></li>
+          <li><code>test_episodes = 24</code></li>
+          <li><code>top_k = 8</code></li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Dimensoes</h3>
+        <ul>
+          <li><code>state_dim = 6</code></li>
+          <li><code>vision_dim = 10</code></li>
+          <li><code>action_dim = 6</code></li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Seeds</h3>
+        <ul>
+          <li><code>7, 11, 19, 23, 31</code></li>
+          <li>media e desvio padrao reportados</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Leitura correta</h3>
+        <ul>
+          <li>melhor media importa</li>
+          <li>menor desvio importa muito</li>
+          <li>world model ainda e experimental</li>
+        </ul>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <h2>Definicao das ablações</h2>
+      <p>
+        Cada variante isola um componente do pipeline para mostrar onde o ganho realmente aparece.
+      </p>
+    </div>
+
+    <section class="grid cols-4">
+      <article class="card">
+        <h3>Vision Only</h3>
+        <p>
+          Usa apenas a chave visual corrente para recuperar uma acao instantanea.
+        </p>
+      </article>
+      <article class="card">
+        <h3>Multimodal Instant</h3>
+        <p>
+          Usa visao, propriocepcao, contato, fase e comando, mas ainda recupera apenas uma acao local.
+        </p>
+      </article>
+      <article class="card">
+        <h3>Chunk Only</h3>
+        <p>
+          Usa historico temporal multimodal e recupera um <em>skill chunk</em> em vez de uma acao isolada.
+        </p>
+      </article>
+      <article class="card">
+        <h3>Chunk + World Model</h3>
+        <p>
+          Reranqueia chunks com um modelo preditivo curto. Nesta versao, ele ainda nao supera o prior de retrieval.
+        </p>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <h2>Resultados</h2>
+      <p>
+        Tabela agregada do arquivo <code>results/multiseed_default.json</code>. Valores reportados como
+        <strong>media +/- desvio padrao</strong>.
+      </p>
+    </div>
+
+    <table>
+      <caption>Comparacao entre controladores no benchmark multi-seed.</caption>
+      <thead>
+        <tr>
+          <th>Modelo</th>
+          <th>Action MSE</th>
+          <th>State MSE</th>
+          <th>Success Rate</th>
+          <th>Fall Rate</th>
+          <th>Leitura</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>vision_only</strong></td>
+          <td>0.5384 +/- 0.1133</td>
+          <td>0.4751 +/- 0.1184</td>
+          <td>24.2% +/- 14.8</td>
+          <td>0.0% +/- 0.0</td>
+          <td><span class="badge bad">baseline fraco</span></td>
+        </tr>
+        <tr>
+          <td><strong>multimodal_instant</strong></td>
+          <td>0.1418 +/- 0.0260</td>
+          <td>0.1368 +/- 0.0326</td>
+          <td>74.2% +/- 13.0</td>
+          <td>0.0% +/- 0.0</td>
+          <td><span class="badge good">grande salto</span></td>
+        </tr>
+        <tr>
+          <td><strong>chunk_only</strong></td>
+          <td>0.1443 +/- 0.0330</td>
+          <td>0.1423 +/- 0.0384</td>
+          <td>75.0% +/- 5.9</td>
+          <td>0.0% +/- 0.0</td>
+          <td><span class="badge good">melhor geral</span></td>
+        </tr>
+        <tr>
+          <td><strong>chunk_world_model</strong></td>
+          <td>0.1916 +/- 0.0378</td>
+          <td>0.1809 +/- 0.0456</td>
+          <td>64.2% +/- 10.5</td>
+          <td>0.0% +/- 0.0</td>
+          <td><span class="badge warn">ainda nao compensa</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Insight principal</strong>
+      O ganho dominante vem de <strong>retrieval multimodal</strong>. O passo seguinte relevante nao foi
+      o world model, e sim a recuperacao de <strong>skill chunks temporais</strong>, que manteve media de sucesso
+      ligeiramente maior e, principalmente, reduziu bastante a variabilidade entre seeds.
+    </div>
+
+    <section class="grid cols-3">
+      <article class="card">
+        <h3>O que foi provado</h3>
+        <p>
+          Retrieval baseado apenas em visao e insuficiente. O uso de estado multimodal temporal melhora
+          a decisao e aumenta a robustez do controle.
+        </p>
+      </article>
+      <article class="card">
+        <h3>O que ainda nao foi provado</h3>
+        <p>
+          Um tiny world model ainda nao superou o melhor retrieval puro. Portanto, ele nao deve ser
+          apresentado como breakthrough nesta versao.
+        </p>
+      </article>
+      <article class="card">
+        <h3>Claim segura</h3>
+        <p>
+          <strong>Temporal skill-chunk retrieval improves robustness and success consistency over
+          instantaneous multimodal retrieval, while vision-only retrieval remains substantially weaker.</strong>
+        </p>
+      </article>
+    </section>
+
+    <section class="footer">
+      <p>
+        Arquitetura avaliada: MCU com memoria de retrieval, indexacao multimodal, recuperacao de chunks temporais
+        e reranking preditivo curto. Este HTML resume a metodologia usada no repositório
+        <code>mcu-humanoid-colab</code> e o melhor resultado atual para apresentacao e escrita de paper.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
