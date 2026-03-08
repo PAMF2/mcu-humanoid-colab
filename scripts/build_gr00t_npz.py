@@ -102,6 +102,8 @@ def hashed_text_embedding(text: str, dim: int) -> np.ndarray:
 
 
 def discover_task_dirs(dataset_dir: Path) -> list[Path]:
+    if dataset_dir.is_dir() and dataset_dir.name.startswith("g1-") and (dataset_dir / "data").exists():
+        return [dataset_dir]
     return sorted(path for path in dataset_dir.iterdir() if path.is_dir() and path.name.startswith("g1-"))
 
 

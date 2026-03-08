@@ -83,6 +83,14 @@ python scripts/run_experiment.py --config results/groot_real_config.json --datas
 python scripts/plot_results.py --input results/groot_real_run.json --output results/groot_real_run_plot.png
 ```
 
+Build a single-task GR00T dataset:
+
+```bash
+python scripts/inspect_gr00t_dataset.py --dataset-dir /content/nvidia_g1/g1-pick-apple
+python scripts/build_gr00t_npz.py --dataset-dir /content/nvidia_g1/g1-pick-apple --output results/groot_apple.npz --config-output results/groot_apple_config.json --max-episodes 128
+python scripts/run_experiment.py --config results/groot_apple_config.json --dataset-path results/groot_apple.npz --output results/groot_apple_run.json
+```
+
 Run the bundled real-data sample from GitHub:
 
 ```bash

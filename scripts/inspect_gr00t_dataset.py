@@ -16,7 +16,16 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    task_dirs = sorted(path for path in args.dataset_dir.iterdir() if path.is_dir() and path.name.startswith("g1-"))
+    if (
+        args.dataset_dir.is_dir()
+        and args.dataset_dir.name.startswith("g1-")
+        and (args.dataset_dir / "data").exists()
+    ):
+        task_dirs = [args.dataset_dir]
+    else:
+        task_dirs = sorted(
+            path for path in args.dataset_dir.iterdir() if path.is_dir() and path.name.startswith("g1-")
+        )
     if args.task:
         task_dirs = [path for path in task_dirs if path.name == args.task]
     if not task_dirs:
