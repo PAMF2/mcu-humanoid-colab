@@ -4,7 +4,7 @@ import argparse
 import json
 import statistics
 import sys
-from copy import replace
+from dataclasses import replace
 from pathlib import Path
 
 
