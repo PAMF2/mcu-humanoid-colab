@@ -3,4 +3,5 @@ __pycache__/
 .ipynb_checkpoints/
 
 results/*.json
+results/*.npz
 !results/.gitkeep

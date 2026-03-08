@@ -26,6 +26,8 @@ mcu_humanoid_colab/
 - A dedicated `scripts/run_experiment.py` entrypoint for Colab
 - A notebook scaffold ready to upload and run
 - An `npz` dataset adapter so you can plug real data into the same schema later
+- Synthetic dataset export to `.npz`
+- Dataset validation before running long Colab jobs
 
 ## Quickstart
 
@@ -39,6 +41,18 @@ Full synthetic run:
 
 ```bash
 python scripts/run_experiment.py --config configs/default.json --output results/default.json --cpu
+```
+
+Export a schema-correct synthetic `.npz`:
+
+```bash
+python scripts/export_synthetic_npz.py --output data/synthetic_humanoid.npz
+```
+
+Validate a real `.npz` before training:
+
+```bash
+python scripts/validate_npz.py --dataset data/your_dataset.npz
 ```
 
 ## Colab workflow
@@ -82,6 +96,8 @@ Optional:
 - `skill`: `[N, T]`
 - `context`: `[N, T, Dcxt]`
 - `phase_scalar`: `[N, T]`
+
+You can start from `configs/npz_template.json` and override `--dataset-path`.
 
 ## Safe paper claim
 

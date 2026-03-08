@@ -179,7 +179,7 @@ def evaluate_synthetic_controller(
 
         for step in range(len(episode.action)):
             vision, proprio, contact, phase_vec, command = env.observe(state, skill, context, phase)
-            temporal_obs = np.concatenate([vision, proprio, contact, phase_vec], axis=0)
+            temporal_obs = np.concatenate([vision, proprio, contact, phase_vec, command], axis=0)
             while len(history_buffer) < config.history:
                 history_buffer.append(temporal_obs.copy())
             history_buffer.append(temporal_obs.copy())
@@ -244,7 +244,13 @@ def evaluate_offline_controller(
         history_buffer: List[np.ndarray] = []
         for step in range(config.history - 1, len(episode.action)):
             temporal_obs = np.concatenate(
-                [episode.vision[step], episode.proprio[step], episode.contact[step], episode.phase[step]],
+                [
+                    episode.vision[step],
+                    episode.proprio[step],
+                    episode.contact[step],
+                    episode.phase[step],
+                    episode.command[step],
+                ],
                 axis=0,
             )
             while len(history_buffer) < config.history:

@@ -16,6 +16,31 @@ def _default_phase_scalar(phase: np.ndarray) -> np.ndarray:
     return np.arctan2(phase[:, 0], phase[:, 1]).astype(np.float32)
 
 
+def _validate_episode_arrays(
+    vision: np.ndarray,
+    proprio: np.ndarray,
+    contact: np.ndarray,
+    phase: np.ndarray,
+    command: np.ndarray,
+    action: np.ndarray,
+    state: np.ndarray,
+) -> None:
+    lengths = {
+        "vision": vision.shape[0],
+        "proprio": proprio.shape[0],
+        "contact": contact.shape[0],
+        "phase": phase.shape[0],
+        "command": command.shape[0],
+        "action": action.shape[0],
+        "state": state.shape[0],
+    }
+    if len(set(lengths.values())) != 1:
+        raise ValueError(f"Inconsistent episode lengths: {lengths}")
+
+    if phase.shape[-1] != 2:
+        raise ValueError(f"Expected phase shape [T, 2], got {phase.shape}")
+
+
 def load_npz_episodes(path: str | Path, context_dim: int) -> List[EpisodeBatch]:
     payload = np.load(Path(path), allow_pickle=False)
     required = ["vision", "proprio", "contact", "phase", "command", "action", "state"]
@@ -33,6 +58,7 @@ def load_npz_episodes(path: str | Path, context_dim: int) -> List[EpisodeBatch]:
         command = payload["command"][index].astype(np.float32)
         action = payload["action"][index].astype(np.float32)
         state = payload["state"][index].astype(np.float32)
+        _validate_episode_arrays(vision, proprio, contact, phase, command, action, state)
 
         steps = vision.shape[0]
         skill = (
@@ -72,6 +98,8 @@ def load_npz_episodes(path: str | Path, context_dim: int) -> List[EpisodeBatch]:
 def split_episodes(
     episodes: List[EpisodeBatch], train_split: float
 ) -> Tuple[List[EpisodeBatch], List[EpisodeBatch]]:
+    if len(episodes) < 2:
+        raise ValueError("At least 2 episodes are required to create train/test splits.")
     cut = max(1, int(len(episodes) * train_split))
     cut = min(cut, len(episodes) - 1)
     return episodes[:cut], episodes[cut:]

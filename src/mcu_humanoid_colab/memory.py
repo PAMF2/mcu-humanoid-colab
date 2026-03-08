@@ -49,13 +49,10 @@ def build_memories(
             ],
             axis=-1,
         )
-        temporal = np.concatenate(
-            [episode.vision, episode.proprio, episode.contact, episode.phase], axis=-1
-        )
         for step in range(history - 1, horizon - chunk_len):
             vision_keys.append(episode.vision[step])
             multimodal_keys.append(full[step])
-            chunk_keys.append(flatten_history(temporal[step - history + 1 : step + 1]))
+            chunk_keys.append(flatten_history(full[step - history + 1 : step + 1]))
             instant_actions.append(episode.action[step])
             chunk_actions.append(episode.action[step : step + chunk_len])
 
