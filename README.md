@@ -81,6 +81,15 @@ python scripts/run_experiment.py --config sample_data/libero_real_config.json --
 python scripts/run_multiseed.py --config sample_data/libero_real_config.json --dataset-path sample_data/libero_real_sample.npz --output results/libero_real_multiseed.json
 ```
 
+Run the bundled medium real-data sample from GitHub:
+
+```bash
+python scripts/validate_npz.py --dataset sample_data/libero_real_medium.npz
+python scripts/run_experiment.py --config sample_data/libero_real_medium_config.json --dataset-path sample_data/libero_real_medium.npz --output results/libero_real_medium_run.json
+python scripts/run_multiseed.py --config sample_data/libero_real_medium_config.json --dataset-path sample_data/libero_real_medium.npz --output results/libero_real_medium_multiseed.json
+python scripts/plot_results.py --input results/libero_real_medium_multiseed.json --output results/libero_real_medium_plot.png
+```
+
 ## Colab workflow
 
 1. Upload this folder to `/content/mcu_humanoid_colab`.

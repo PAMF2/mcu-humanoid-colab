@@ -6,6 +6,8 @@ Files:
 
 - `libero_real_sample.npz`
 - `libero_real_config.json`
+- `libero_real_medium.npz`
+- `libero_real_medium_config.json`
 
 Source:
 
@@ -17,3 +19,4 @@ Purpose:
 
 - let the user run a real-data benchmark immediately after `git clone`
 - avoid any manual upload step for the first real-data experiment
+- provide both a tiny sample and a more meaningful medium sample
