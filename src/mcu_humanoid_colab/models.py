@@ -10,6 +10,12 @@ from torch.utils.data import DataLoader, TensorDataset
 from .schema import EpisodeBatch
 
 
+def _goal_state(episode: EpisodeBatch, step: int) -> np.ndarray:
+    if episode.command.shape[-1] == episode.state.shape[-1]:
+        return episode.command[step]
+    return episode.state[-1]
+
+
 class TinyWorldModel(nn.Module):
     def __init__(self, state_dim: int, action_dim: int, hidden_dim: int = 128) -> None:
         super().__init__()
@@ -71,8 +77,9 @@ def build_world_model_data(
             state_inputs.append(current[step])
             actions.append(episode.action[step])
             next_states.append(nxt[step])
-            current_goal = np.mean((episode.state[step] - episode.command[step]) ** 2)
-            next_goal = np.mean((episode.state[step + 1] - episode.command[step]) ** 2)
+            goal_state = _goal_state(episode, step)
+            current_goal = np.mean((episode.state[step] - goal_state) ** 2)
+            next_goal = np.mean((episode.state[step + 1] - goal_state) ** 2)
             progress.append(current_goal - next_goal)
             instability.append(
                 1.0 if np.linalg.norm(episode.state[step + 1]) > instability_threshold else 0.0
@@ -98,6 +105,7 @@ def build_chunk_decoder_data(
 
     for episode in episodes:
         for step in range(len(episode.action) - chunk_len):
+            goal_state = _goal_state(episode, step)
             state_inputs.append(
                 np.concatenate(
                     [
@@ -114,9 +122,9 @@ def build_chunk_decoder_data(
             score = 0.0
             for offset in range(1, chunk_len + 1):
                 current_error = np.mean(
-                    (episode.state[step + offset - 1] - episode.command[step]) ** 2
+                    (episode.state[step + offset - 1] - goal_state) ** 2
                 )
-                next_error = np.mean((episode.state[step + offset] - episode.command[step]) ** 2)
+                next_error = np.mean((episode.state[step + offset] - goal_state) ** 2)
                 score += current_error - next_error
                 if np.linalg.norm(episode.state[step + offset]) > instability_threshold:
                     score -= 0.6
