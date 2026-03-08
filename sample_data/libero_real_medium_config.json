@@ -1,6 +1,6 @@
 {
   "dataset": "npz",
-  "dataset_path": "C:/Users/Pichau/Desktop/science/mcu_humanoid_colab/results/libero_real_medium.npz",
+  "dataset_path": "sample_data/libero_real_medium.npz",
   "train_split": 0.8,
   "seed": 7,
   "train_episodes": 0,

@@ -73,6 +73,16 @@ Build a real `.npz` from local parquet episodes with embedded images:
 python scripts/build_real_npz.py --dataset-dir path/to/libero_train --output results/libero_real.npz --config-output results/libero_real_config.json
 ```
 
+Build a real `.npz` directly from the downloaded NVIDIA `GR00T-Teleop-G1` dataset:
+
+```bash
+python scripts/inspect_gr00t_dataset.py --dataset-dir /content/nvidia_g1
+python scripts/build_gr00t_npz.py --dataset-dir /content/nvidia_g1 --output results/groot_real.npz --config-output results/groot_real_config.json --max-episodes 64
+python scripts/validate_npz.py --dataset results/groot_real.npz
+python scripts/run_experiment.py --config results/groot_real_config.json --dataset-path results/groot_real.npz --output results/groot_real_run.json
+python scripts/plot_results.py --input results/groot_real_run.json --output results/groot_real_run_plot.png
+```
+
 Run the bundled real-data sample from GitHub:
 
 ```bash
