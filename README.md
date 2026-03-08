@@ -55,6 +55,12 @@ Validate a real `.npz` before training:
 python scripts/validate_npz.py --dataset data/your_dataset.npz
 ```
 
+Run the benchmark across multiple seeds:
+
+```bash
+python scripts/run_multiseed.py --config configs/default.json --output results/multiseed_default.json --cpu
+```
+
 ## Colab workflow
 
 1. Upload this folder to `/content/mcu_humanoid_colab`.
