@@ -9,7 +9,7 @@ import numpy as np
 import torch
 
 from .config import ExperimentConfig
-from .data import load_npz_episodes, split_episodes
+from .data import load_npz_episodes, split_episodes, split_episodes_by_skill
 from .memory import build_banks, build_memories, flatten_history
 from .models import (
     build_chunk_decoder_data,
@@ -48,8 +48,16 @@ def load_episodes(
         return env, train, test
 
     if config.dataset == "npz" and config.dataset_path:
+        if config.test_dataset_path:
+            train = load_npz_episodes(config.dataset_path, context_dim=config.context_dim)
+            test = load_npz_episodes(config.test_dataset_path, context_dim=config.context_dim)
+            return None, train, test
+
         episodes = load_npz_episodes(config.dataset_path, context_dim=config.context_dim)
-        train, test = split_episodes(episodes, train_split=config.train_split)
+        if config.holdout_skill is not None:
+            train, test = split_episodes_by_skill(episodes, holdout_skill=config.holdout_skill)
+        else:
+            train, test = split_episodes(episodes, train_split=config.train_split)
         return None, train, test
 
     raise ValueError("Unsupported dataset setup. Use synthetic or dataset=npz with dataset_path.")

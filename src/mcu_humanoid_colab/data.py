@@ -103,3 +103,20 @@ def split_episodes(
     cut = max(1, int(len(episodes) * train_split))
     cut = min(cut, len(episodes) - 1)
     return episodes[:cut], episodes[cut:]
+
+
+def episode_skill_id(episode: EpisodeBatch) -> int:
+    values, counts = np.unique(episode.skill.astype(np.int64), return_counts=True)
+    return int(values[np.argmax(counts)])
+
+
+def split_episodes_by_skill(
+    episodes: List[EpisodeBatch], holdout_skill: int
+) -> Tuple[List[EpisodeBatch], List[EpisodeBatch]]:
+    train = [episode for episode in episodes if episode_skill_id(episode) != holdout_skill]
+    test = [episode for episode in episodes if episode_skill_id(episode) == holdout_skill]
+    if not train:
+        raise ValueError(f"No training episodes remain after holding out skill {holdout_skill}.")
+    if not test:
+        raise ValueError(f"No test episodes found for holdout skill {holdout_skill}.")
+    return train, test

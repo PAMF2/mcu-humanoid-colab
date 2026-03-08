@@ -9,7 +9,9 @@ from pathlib import Path
 class ExperimentConfig:
     dataset: str = "synthetic"
     dataset_path: str | None = None
+    test_dataset_path: str | None = None
     train_split: float = 0.8
+    holdout_skill: int | None = None
     seed: int = 7
     train_episodes: int = 96
     test_episodes: int = 24
@@ -28,6 +30,7 @@ class ExperimentConfig:
     instability_threshold: float = 4.25
     success_threshold: float = 0.18
     rerank_margin: float = 0.08
+    task_names: list[str] | None = None
 
     @classmethod
     def from_json(cls, path: str | Path) -> "ExperimentConfig":

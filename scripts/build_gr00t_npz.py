@@ -187,11 +187,14 @@ def write_companion_config(
     npz_path: Path,
     sample_window: dict[str, np.ndarray],
     num_skills: int,
+    task_names: list[str],
 ) -> None:
     payload = {
         "dataset": "npz",
         "dataset_path": str(npz_path).replace("\\", "/"),
+        "test_dataset_path": None,
         "train_split": 0.8,
+        "holdout_skill": None,
         "seed": 7,
         "train_episodes": 0,
         "test_episodes": 0,
@@ -210,6 +213,7 @@ def write_companion_config(
         "instability_threshold": 4.25,
         "success_threshold": 0.18,
         "rerank_margin": 0.08,
+        "task_names": task_names,
     }
     output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
@@ -335,7 +339,13 @@ def main() -> None:
 
     if args.config_output is not None:
         args.config_output.parent.mkdir(parents=True, exist_ok=True)
-        write_companion_config(args.config_output, args.output, windows[0], num_skills=len(task_dirs))
+        write_companion_config(
+            args.config_output,
+            args.output,
+            windows[0],
+            num_skills=len(task_dirs),
+            task_names=[task_dir.name for task_dir in task_dirs],
+        )
         print(args.config_output.resolve())
 
 

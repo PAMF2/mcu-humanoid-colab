@@ -91,6 +91,23 @@ python scripts/build_gr00t_npz.py --dataset-dir /content/nvidia_g1/g1-pick-apple
 python scripts/run_experiment.py --config results/groot_apple_config.json --dataset-path results/groot_apple.npz --output results/groot_apple_run.json
 ```
 
+Leave-one-task-out generalization from a combined GR00T dataset:
+
+```bash
+python scripts/run_leave_one_out.py --config results/groot_real_256_config.json --dataset-path results/groot_real_256.npz --output results/groot_leave_one_out.json
+```
+
+Cross-task generalization matrix from per-task GR00T configs:
+
+```bash
+python scripts/run_cross_task_matrix.py \
+  --task-config apple=results/groot_apple_config.json \
+  --task-config grapes=results/groot_grapes_config.json \
+  --task-config pear=results/groot_pear_config.json \
+  --task-config starfruit=results/groot_starfruit_config.json \
+  --output results/groot_cross_task.json
+```
+
 Run the bundled real-data sample from GitHub:
 
 ```bash
