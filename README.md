@@ -43,6 +43,12 @@ Full synthetic run:
 python scripts/run_experiment.py --config configs/default.json --output results/default.json --cpu
 ```
 
+Local install with PyTorch:
+
+```bash
+pip install -r requirements-local.txt
+```
+
 Export a schema-correct synthetic `.npz`:
 
 ```bash
@@ -68,6 +74,11 @@ python scripts/run_multiseed.py --config configs/default.json --output results/m
 3. Run the setup cell.
 4. Run the smoke config first.
 5. If the baseline table looks sane, run the default config.
+
+Note for Colab:
+
+- `requirements.txt` intentionally avoids reinstalling `torch`, so Colab keeps its preinstalled CUDA build.
+- If you see `torch ... +cpu`, your environment is using a CPU-only wheel even if the runtime type is GPU.
 
 ## Current benchmark stages
 
