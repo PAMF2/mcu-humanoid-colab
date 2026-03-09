@@ -73,8 +73,24 @@ def main() -> None:
     ]
     if args.model:
         cmd.extend(["--model", args.model])
+    cmd.append(build_prompt(branch))
 
-    result = run(cmd, input=build_prompt(branch), capture_output=True)
+    try:
+        result = run(cmd, capture_output=True)
+    except subprocess.CalledProcessError as exc:
+        stdout = exc.stdout or ""
+        stderr = exc.stderr or ""
+        message = (
+            "Claude Code execution failed.\n"
+            "--- stdout ---\n"
+            f"{stdout}\n"
+            "--- stderr ---\n"
+            f"{stderr}\n"
+        )
+        LAST_MESSAGE.write_text(message, encoding="utf-8")
+        print(message)
+        raise
+
     LAST_MESSAGE.write_text(result.stdout, encoding="utf-8")
 
     print((AUTORESEARCH / "results.tsv").resolve())
