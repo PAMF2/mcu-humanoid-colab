@@ -14,6 +14,12 @@ Important constraints:
 Start by doing setup if needed, then run the baseline, log it, and continue autonomously.
 ```
 
+This file is also consumed automatically by:
+
+```bash
+python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+```
+
 If you want a more explicit kickoff prompt, use:
 
 ```text

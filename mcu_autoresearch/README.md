@@ -58,6 +58,12 @@ Or do setup + baseline in one shot:
 python mcu_autoresearch/bootstrap.py --preset real-medium
 ```
 
+Or run the full Codex-driven loop in one command:
+
+```bash
+python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+```
+
 Only `mcu_autoresearch/train.py` should be edited by the agent.
 `mcu_autoresearch/workspace/` is ignored by git so setup does not dirty the branch.
 
@@ -108,3 +114,9 @@ The shortest path is:
 
 1. run `python mcu_autoresearch/bootstrap.py --preset real-medium`
 2. paste the prompt from `mcu_autoresearch/agent_prompt.md` into the agent
+
+If you already have Codex CLI configured locally, skip the manual prompt handoff and run:
+
+```bash
+python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+```
