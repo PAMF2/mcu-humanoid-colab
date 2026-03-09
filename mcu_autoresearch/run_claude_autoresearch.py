@@ -74,9 +74,10 @@ def main() -> None:
     ]
     if args.model:
         cmd.extend(["--model", args.model])
+    cmd.append(build_prompt(branch))
 
     try:
-        result = run(cmd, input=build_prompt(branch), capture_output=True)
+        result = run(cmd, capture_output=True)
     except subprocess.CalledProcessError as exc:
         stdout = exc.stdout or ""
         stderr = exc.stderr or ""
