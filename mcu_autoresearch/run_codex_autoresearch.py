@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import subprocess
 import sys
 from datetime import datetime
@@ -12,22 +11,6 @@ AUTORESEARCH = ROOT / "mcu_autoresearch"
 BOOTSTRAP = AUTORESEARCH / "bootstrap.py"
 PROMPT_FILE = AUTORESEARCH / "agent_prompt.md"
 LAST_MESSAGE = AUTORESEARCH / "workspace" / "codex_last_message.txt"
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run MCU autoresearch end-to-end with Codex CLI")
-    parser.add_argument("--preset", default="real-medium", help="Benchmark preset passed to bootstrap.py")
-    parser.add_argument(
-        "--branch-tag",
-        default="",
-        help="Optional suffix for autoresearch branch. Defaults to a timestamp.",
-    )
-    parser.add_argument(
-        "--model",
-        default="",
-        help="Optional Codex model override, for example gpt-5-codex.",
-    )
-    return parser.parse_args()
 
 
 def run(cmd: list[str], **kwargs: object) -> None:
@@ -72,10 +55,8 @@ def build_prompt(branch: str) -> str:
 
 
 def main() -> None:
-    args = parse_args()
-
-    ensure_branch(args.branch_tag)
-    run([sys.executable, str(BOOTSTRAP), "--preset", args.preset])
+    ensure_branch("")
+    run([sys.executable, str(BOOTSTRAP)])
 
     cmd = [
         "codex",
@@ -86,10 +67,7 @@ def main() -> None:
         "--output-last-message",
         str(LAST_MESSAGE),
     ]
-    if args.model:
-        cmd.extend(["--model", args.model])
-
-    run(cmd, input=build_prompt(ensure_branch(args.branch_tag)), text=True)
+    run(cmd, input=build_prompt(ensure_branch("")), text=True)
 
     print((AUTORESEARCH / "results.tsv").resolve())
     print(LAST_MESSAGE.resolve())

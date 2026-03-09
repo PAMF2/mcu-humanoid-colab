@@ -1,73 +1,122 @@
-# MCU Autoresearch
+# autoresearch
 
-This folder adapts the `autoresearch` loop to the MCU benchmark.
+This is an experiment to let the agent do autonomous research on the MCU controller.
+
+This run is for real model training, not cheap CPU-only retrieval tuning.
+Use the GPU.
 
 ## Setup
 
-To set up a new run:
+To set up a new experiment:
 
-1. Choose a short tag, e.g. `mar8-mcu`.
-2. Create a branch: `git checkout -b autoresearch/<tag>`.
-3. Read these files for context:
-   - `mcu_autoresearch/README.md`
+1. Create a fresh branch: `git checkout -b autoresearch/<tag>`
+2. Read the in-scope files for full context:
+   - `mcu_autoresearch/program.md`
    - `mcu_autoresearch/prepare.py`
    - `mcu_autoresearch/train.py`
-   - `src/mcu_humanoid_colab/experiment.py`
-   - `src/mcu_humanoid_colab/memory.py`
-   - `src/mcu_humanoid_colab/models.py`
-4. Run setup:
-   - `python mcu_autoresearch/prepare.py --preset real-medium`
-5. Confirm that:
+3. Run setup:
+   - `python mcu_autoresearch/prepare.py`
+4. Verify that:
    - `mcu_autoresearch/workspace/active_config.json` exists
    - `mcu_autoresearch/results.tsv` exists
+5. Confirm setup looks good and start experimentation immediately.
 
-## Constraints
+The prepared benchmark is fixed:
 
-The benchmark is fixed.
+- dataset: `sample_data/libero_real_sample.npz`
+- config: `sample_data/libero_real_config.json`
 
-What you may change:
+Do not change the benchmark.
 
-- `mcu_autoresearch/train.py`
+## Experimentation
 
-What you must not change during the autonomous loop:
+Each experiment is a single run of:
 
-- `mcu_autoresearch/prepare.py`
-- `src/mcu_humanoid_colab/data.py`
-- `src/mcu_humanoid_colab/experiment.py`
-- dataset files
-- evaluation harness
+`python mcu_autoresearch/train.py`
+
+The output metric is `primary_metric`.
+
+For this benchmark, `primary_metric == action_mse`.
+Lower is better.
+
+The initial baseline is approximately:
+
+- `multimodal_instant ~= 0.354766`
+
+## What you CAN do
+
+- Modify `mcu_autoresearch/train.py`
+
+This is the only file you edit.
+
+## What you CANNOT do
+
+- Modify `mcu_autoresearch/prepare.py`
+- Modify files under `src/mcu_humanoid_colab/`
+- Modify dataset files
+- Add dependencies
+- Change the evaluation harness
 
 ## Goal
 
-Minimize `primary_metric`.
+Get the lowest `primary_metric`.
 
-- On offline runs, this is `action_mse`.
-- On synthetic runs, it also reflects `success_rate` and `fall_rate`.
+This time, prioritize experiments that actually train the predictive parts of the controller:
 
-Lower is better.
+- tiny world model
+- chunk decoder
+- GPU-backed training
 
-## Search directions
+Do not spend the whole run only changing cheap retrieval knobs.
 
-Good experiment ideas:
+Good search directions:
 
-- rebalance multimodal query weights
-- compare instant retrieval against chunk retrieval
-- vary `top_k`
-- change chunk aggregation from `first` to weighted average
-- tune rerank weights for similarity, rollout score, decoder score
-- enable or disable the tiny world model
-- simplify the controller if performance stays the same
+- instant retrieval vs chunk retrieval
+- `top_k`
+- `chunk_len`
+- `history`
+- query weights for `vision`, `proprio`, `contact`, `phase`, `command`
+- chunk aggregation strategy
+- use of the tiny world model
+- use of the chunk decoder
+- world model epochs
+- batch size
+- predictive reranking weights
 
-Bad experiment ideas:
+Bad directions:
 
-- editing many files outside `train.py`
-- changing the benchmark or metric
-- adding new dependencies
+- editing anything outside `mcu_autoresearch/train.py`
+- changing the benchmark
+- changing the metric
 - rewriting data loading
 
-## Logging
+## Output format
 
-After each run, append to `mcu_autoresearch/results.tsv`:
+`train.py` prints a block like:
+
+```text
+---
+primary_metric:    0.123456
+action_mse:        0.123456
+success_rate:      0.000000
+fall_rate:         0.000000
+training_seconds:  1.2
+peak_vram_mb:      0.0
+num_train_episodes: 9
+num_test_episodes:  3
+```
+
+You can extract the key metric with:
+
+```bash
+grep "^primary_metric:\|^peak_vram_mb:" mcu_autoresearch/run.log
+```
+
+## Logging results
+
+Log every experiment to `mcu_autoresearch/results.tsv`.
+
+The TSV has 8 columns:
 
 ```text
 commit	primary_metric	action_mse	success_rate	fall_rate	memory_gb	status	description
@@ -75,20 +124,33 @@ commit	primary_metric	action_mse	success_rate	fall_rate	memory_gb	status	descrip
 
 Rules:
 
-- `status=keep` if `primary_metric` improved
-- `status=discard` if it got worse or stayed equal
-- `status=crash` if the run failed
+- `keep` if `primary_metric` improved
+- `discard` if it got worse or stayed equal
+- `crash` if the run failed
 
-## Loop
+## The experiment loop
 
-1. Edit `mcu_autoresearch/train.py`
-2. Commit
-3. Run: `python mcu_autoresearch/train.py > run.log 2>&1`
-4. Extract metrics from `mcu_autoresearch/run.log`
-5. Append to the log with:
+LOOP FOREVER:
+
+1. Look at the current git state.
+2. Modify `mcu_autoresearch/train.py` with one experimental idea.
+3. Commit.
+4. Run:
+   - `python mcu_autoresearch/train.py > mcu_autoresearch/run.log 2>&1`
+5. Read out the result:
+   - `grep "^primary_metric:\|^peak_vram_mb:" mcu_autoresearch/run.log`
+6. If the grep output is empty, the run crashed:
+   - read `tail -n 50 mcu_autoresearch/run.log`
+   - log `crash`
+   - move on
+7. Append the result with:
    - `python mcu_autoresearch/log_result.py --status keep --description "<short note>"`
    - `python mcu_autoresearch/log_result.py --status discard --description "<short note>"`
    - `python mcu_autoresearch/log_result.py --status crash --description "<short note>"`
-6. Keep or discard the commit based on `primary_metric`
+8. Keep the commit only if `primary_metric` improved.
+9. Otherwise discard and continue.
 
-Keep the loop narrow and data-driven.
+Do not stop to summarize the codebase.
+Do not stop after one experiment.
+Do not ask whether to continue.
+Continue autonomously until manually interrupted.

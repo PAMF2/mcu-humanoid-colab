@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import subprocess
 import sys
 from pathlib import Path
@@ -11,17 +10,6 @@ PREPARE = ROOT / "mcu_autoresearch" / "prepare.py"
 TRAIN = ROOT / "mcu_autoresearch" / "train.py"
 LOGGER = ROOT / "mcu_autoresearch" / "log_result.py"
 RUN_LOG = ROOT / "mcu_autoresearch" / "run.log"
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Bootstrap MCU autoresearch with setup + baseline")
-    parser.add_argument("--preset", default="real-medium", help="Prepare preset")
-    parser.add_argument(
-        "--description",
-        default="baseline multimodal instant",
-        help="Description to log for the baseline run",
-    )
-    return parser.parse_args()
 
 
 def run(cmd: list[str], capture: bool = False) -> str:
@@ -36,11 +24,11 @@ def run(cmd: list[str], capture: bool = False) -> str:
 
 
 def main() -> None:
-    args = parse_args()
+    description = "baseline"
 
-    run([sys.executable, str(PREPARE), "--preset", args.preset])
+    run([sys.executable, str(PREPARE)])
 
-    with RUN_LOG.open("w", encoding="utf-16") as handle:
+    with RUN_LOG.open("w", encoding="utf-8") as handle:
         subprocess.run(
             [sys.executable, str(TRAIN)],
             cwd=ROOT,
@@ -57,7 +45,7 @@ def main() -> None:
             "--status",
             "keep",
             "--description",
-            args.description,
+            description,
         ]
     )
 

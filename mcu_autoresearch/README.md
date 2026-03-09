@@ -20,7 +20,7 @@ This setup uses the existing benchmark implementation in `../src/mcu_humanoid_co
 From the repository root:
 
 ```bash
-python mcu_autoresearch/prepare.py --preset real-medium
+python mcu_autoresearch/prepare.py
 python mcu_autoresearch/train.py
 ```
 
@@ -39,7 +39,7 @@ That creates:
 You can also point directly at an existing config:
 
 ```bash
-python mcu_autoresearch/prepare.py --config sample_data/libero_real_medium_config.json
+python mcu_autoresearch/prepare.py
 ```
 
 ## Autoresearch loop
@@ -47,7 +47,7 @@ python mcu_autoresearch/prepare.py --config sample_data/libero_real_medium_confi
 This folder is meant to be driven exactly like `autoresearch`:
 
 ```bash
-python mcu_autoresearch/prepare.py --preset real-medium
+python mcu_autoresearch/prepare.py
 python mcu_autoresearch/train.py > mcu_autoresearch/run.log 2>&1
 python mcu_autoresearch/log_result.py --status keep --description "baseline multimodal instant"
 ```
@@ -55,19 +55,19 @@ python mcu_autoresearch/log_result.py --status keep --description "baseline mult
 Or do setup + baseline in one shot:
 
 ```bash
-python mcu_autoresearch/bootstrap.py --preset real-medium
+python mcu_autoresearch/bootstrap.py
 ```
 
 Or run the full Codex-driven loop in one command:
 
 ```bash
-python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+python mcu_autoresearch/run_codex_autoresearch.py
 ```
 
 Or run the full Claude Code-driven loop in one command:
 
 ```bash
-python mcu_autoresearch/run_claude_autoresearch.py --preset real-medium
+python mcu_autoresearch/run_claude_autoresearch.py
 ```
 
 Only `mcu_autoresearch/train.py` should be edited by the agent.
@@ -118,17 +118,17 @@ Files intended for direct agent use:
 
 The shortest path is:
 
-1. run `python mcu_autoresearch/bootstrap.py --preset real-medium`
+1. run `python mcu_autoresearch/bootstrap.py`
 2. paste the prompt from `mcu_autoresearch/agent_prompt.md` into the agent
 
 If you already have Codex CLI configured locally, skip the manual prompt handoff and run:
 
 ```bash
-python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+python mcu_autoresearch/run_codex_autoresearch.py
 ```
 
 If you want Claude Code instead, use:
 
 ```bash
-python mcu_autoresearch/run_claude_autoresearch.py --preset real-medium
+python mcu_autoresearch/run_claude_autoresearch.py
 ```

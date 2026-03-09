@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# This is the only file the agent edits during autoresearch.
+# The benchmark is fixed by mcu_autoresearch/prepare.py to the LIBERO real sample.
+
 import json
 import sys
 import time
@@ -33,24 +36,24 @@ ACTIVE_CONFIG_PATH = ROOT / "mcu_autoresearch" / "workspace" / "active_config.js
 
 @dataclass
 class ResearchConfig:
-    retrieval_mode: str = "multimodal_instant"
-    top_k: int = 8
-    chunk_len: int = 6
-    history: int = 4
-    vision_weight: float = 1.0
-    proprio_weight: float = 1.0
+    retrieval_mode: str = "chunk_world_model"
+    top_k: int = 16
+    chunk_len: int = 10
+    history: int = 8
+    vision_weight: float = 0.5
+    proprio_weight: float = 2.0
     contact_weight: float = 1.0
-    phase_weight: float = 1.0
+    phase_weight: float = 2.0
     command_weight: float = 1.0
     similarity_weight: float = 0.15
-    rollout_weight: float = 0.2
-    decoder_weight: float = 1.0
+    rollout_weight: float = 0.5
+    decoder_weight: float = 0.5
     rerank_margin: float = 0.08
-    chunk_aggregation: str = "first"
-    use_world_model: bool = False
-    use_chunk_decoder: bool = False
-    world_model_epochs: int = 18
-    batch_size: int = 256
+    chunk_aggregation: str = "sim_weighted"
+    use_world_model: bool = True
+    use_chunk_decoder: bool = True
+    world_model_epochs: int = 96
+    batch_size: int = 1024
     learning_rate: float = 1e-3
 
 
@@ -60,9 +63,12 @@ RESEARCH = ResearchConfig()
 def load_active_config() -> ExperimentConfig:
     if not ACTIVE_CONFIG_PATH.exists():
         raise SystemExit(
-            f"Missing {ACTIVE_CONFIG_PATH}. Run `python mcu_autoresearch/prepare.py --preset real-medium` first."
+            f"Missing {ACTIVE_CONFIG_PATH}. Run `python mcu_autoresearch/prepare.py` first."
         )
     return ExperimentConfig.from_json(ACTIVE_CONFIG_PATH)
+
+
+# The agent edits only this file. Keep the search surface explicit and local.
 
 
 def weighted_features(episode: EpisodeBatch, knobs: ResearchConfig) -> np.ndarray:
@@ -394,7 +400,9 @@ def main() -> None:
     config.rerank_margin = RESEARCH.rerank_margin
 
     set_seed(config.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if not torch.cuda.is_available():
+        raise SystemExit("CUDA GPU required for this autoresearch run.")
+    device = torch.device("cuda")
     env, train_episodes, test_episodes = load_episodes(config)
 
     memories = build_custom_memories(train_episodes, RESEARCH)

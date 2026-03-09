@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import subprocess
 import sys
 from datetime import datetime
@@ -11,22 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 AUTORESEARCH = ROOT / "mcu_autoresearch"
 BOOTSTRAP = AUTORESEARCH / "bootstrap.py"
 LAST_MESSAGE = AUTORESEARCH / "workspace" / "claude_last_message.txt"
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run MCU autoresearch end-to-end with Claude Code")
-    parser.add_argument("--preset", default="real-medium", help="Benchmark preset passed to bootstrap.py")
-    parser.add_argument(
-        "--branch-tag",
-        default="",
-        help="Optional suffix for autoresearch branch. Defaults to a timestamp.",
-    )
-    parser.add_argument(
-        "--model",
-        default="",
-        help="Optional Claude model override, for example sonnet or opus.",
-    )
-    return parser.parse_args()
 
 
 def run(cmd: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
@@ -62,10 +45,9 @@ def build_prompt(branch: str) -> str:
 
 
 def main() -> None:
-    args = parse_args()
-    branch = ensure_branch(args.branch_tag)
+    branch = ensure_branch("")
 
-    run([sys.executable, str(BOOTSTRAP), "--preset", args.preset])
+    run([sys.executable, str(BOOTSTRAP)])
 
     cmd = [
         "claude",
@@ -75,8 +57,6 @@ def main() -> None:
         "--allowedTools",
         "Read,Edit,Bash(git:*),Bash(python:*),Bash(ls:*),Bash(cat:*),Bash(tail:*)",
     ]
-    if args.model:
-        cmd.extend(["--model", args.model])
     cmd.append(build_prompt(branch))
 
     try:

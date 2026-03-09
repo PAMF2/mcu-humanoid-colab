@@ -17,13 +17,13 @@ Start by doing setup if needed, then run the baseline, log it, and continue auto
 This file is also consumed automatically by:
 
 ```bash
-python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+python mcu_autoresearch/run_codex_autoresearch.py
 ```
 
 and:
 
 ```bash
-python mcu_autoresearch/run_claude_autoresearch.py --preset real-medium
+python mcu_autoresearch/run_claude_autoresearch.py
 ```
 
 If you want a more explicit kickoff prompt, use:
@@ -31,6 +31,6 @@ If you want a more explicit kickoff prompt, use:
 ```text
 Open `mcu_autoresearch/program.md`, `mcu_autoresearch/README.md`, and `mcu_autoresearch/train.py`.
 Set up the MCU autoresearch workspace on branch `autoresearch/<today-tag>`.
-Run the baseline with the `real-medium` preset, log it, and then continue autonomous experimentation indefinitely.
+Run the baseline with `python mcu_autoresearch/prepare.py`, log it, and then continue autonomous experimentation indefinitely.
 Only edit `mcu_autoresearch/train.py`.
 ```
