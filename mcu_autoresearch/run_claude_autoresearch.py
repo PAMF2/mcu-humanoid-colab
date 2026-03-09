@@ -67,9 +67,8 @@ def main() -> None:
     cmd = [
         "claude",
         "-p",
-        "--dangerously-skip-permissions",
         "--permission-mode",
-        "bypassPermissions",
+        "acceptEdits",
     ]
     if args.model:
         cmd.extend(["--model", args.model])
