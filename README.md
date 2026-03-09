@@ -1,15 +1,29 @@
 # MCU Humanoid Colab
 
-Clean Colab-first project to validate this claim:
+Autoresearch-style MCU repository for single-GPU experimentation on a fixed real LIBERO-derived benchmark.
 
 `vision-only retrieval < multimodal retrieval < temporal skill-chunk retrieval < predictive reranking`
 
-The project is intentionally split into small parts so you can swap synthetic data for real retargeted humanoid trajectories later without rewriting the pipeline.
+The root flow is intentionally modeled after Karpathy's `autoresearch`:
+
+- `prepare.py` sets up the fixed benchmark and runtime files. Do not modify.
+- `train.py` is the single file the agent edits.
+- `program.md` contains the agent instructions.
+
+There is also a larger module tree under `src/` and `scripts/` for one-off benchmarking and utilities, but the main autonomous-research loop lives at the repository root.
 
 ## Layout
 
 ```text
 mcu_humanoid_colab/
+  workspace/
+  sample_data/
+  prepare.py
+  train.py
+  program.md
+  bootstrap.py
+  pyproject.toml
+  results.tsv
   configs/
   notebooks/
   results/
@@ -19,7 +33,49 @@ mcu_humanoid_colab/
   README.md
 ```
 
-## What is improved here
+## Root Autoresearch Flow
+
+Quick start requirements:
+
+- Python 3.10+
+- `uv`
+- a single NVIDIA GPU
+
+Root workflow:
+
+```bash
+uv sync
+uv run prepare.py
+uv run train.py
+```
+
+If the above commands work, the repo is ready for autonomous research mode.
+
+The fixed benchmark for the root flow is:
+
+- `sample_data/libero_real_sample.npz`
+- `sample_data/libero_real_config.json`
+
+The root outputs are:
+
+- `workspace/active_config.json`
+- `workspace/progress.log`
+- `results.tsv`
+- `run.log`
+
+To initialize baseline in one step:
+
+```bash
+uv run bootstrap.py
+```
+
+Then open your agent in this repo and tell it:
+
+```text
+Read program.md and follow it exactly.
+```
+
+## Supporting Modules
 
 - Config-driven runs instead of a single monolithic script
 - Separate modules for data, synthetic benchmark, memory bank, models, and experiment loop
@@ -29,7 +85,7 @@ mcu_humanoid_colab/
 - Synthetic dataset export to `.npz`
 - Dataset validation before running long Colab jobs
 
-## Quickstart
+## Scripted Benchmark Quickstart
 
 From the project root:
 
