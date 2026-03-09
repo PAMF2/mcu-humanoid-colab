@@ -2,6 +2,12 @@
 
 This is an experiment to have the LLM do its own research on the MCU controller.
 
+The repo is intentionally small. Only three root files matter:
+
+- `prepare.py` — fixed benchmark prep and runtime utilities. Do not modify.
+- `train.py` — the single file you edit.
+- `program.md` — these instructions.
+
 ## Setup
 
 To set up a new experiment, work with the user to:
@@ -20,6 +26,7 @@ To set up a new experiment, work with the user to:
 5. Confirm:
    - `workspace/active_config.json` exists
    - `results.tsv` exists
+   - `workspace/progress.log` exists
 6. Kick off experimentation immediately.
 
 ## Experimentation
@@ -32,7 +39,7 @@ The training script is:
 
 The goal is simple: get the lowest `primary_metric`.
 
-For this benchmark, `primary_metric` is just `action_mse`.
+For this benchmark, `primary_metric` is `action_mse`.
 Lower is better.
 
 The baseline is approximately:
@@ -51,7 +58,6 @@ This is the only file you edit.
 ## What you CANNOT do
 
 - Modify `prepare.py`
-- Modify files under `src/`
 - Modify datasets
 - Add dependencies
 - Modify the evaluation harness
@@ -83,6 +89,18 @@ Rules:
 - `discard` if it got worse or stayed equal
 - `crash` if the run failed
 
+Also append one progress line to `workspace/progress.log`:
+
+```text
+iteration	status	primary_metric	note
+```
+
+Print a line like:
+
+```text
+ITERATION 3 keep 0.301234 top_k=16 improved
+```
+
 ## The experiment loop
 
 LOOP FOREVER:
@@ -94,9 +112,7 @@ LOOP FOREVER:
 5. Read out the result: `grep "^primary_metric:\|^peak_vram_mb:" run.log`
 6. If grep is empty, the run crashed. Read `tail -n 50 run.log`, log a crash, and move on.
 7. Record the result in `results.tsv`
-8. Also append one progress line to `workspace/progress.log`:
-   - `iteration<TAB>status<TAB>primary_metric<TAB>note`
-   - and print a line like `ITERATION 3 keep 0.301234 top_k=16 improved`
+8. Append one line to `workspace/progress.log`
 9. If `primary_metric` improved, keep the commit.
 10. If it did not improve, discard and continue.
 

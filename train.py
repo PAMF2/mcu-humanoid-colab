@@ -12,23 +12,21 @@ from typing import Dict, List
 import numpy as np
 import torch
 
-
 ROOT = Path(__file__).resolve().parent
-SRC_DIR = ROOT / "src"
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-from mcu_humanoid_colab.config import ExperimentConfig
-from mcu_humanoid_colab.experiment import load_episodes, normalize_phase, set_seed
-from mcu_humanoid_colab.memory import MemoryBank, flatten_history
-from mcu_humanoid_colab.models import (
-    build_chunk_decoder_data,
-    build_world_model_data,
-    train_chunk_decoder,
-    train_world_model,
+from prepare import (
+    MemoryBank,
+    PredictiveBundle,
+    EpisodeBatch,
+    ExperimentConfig,
+    build_predictive_bundle,
+    flatten_history,
+    load_active_config,
+    load_runtime,
+    normalize_phase,
 )
-from mcu_humanoid_colab.schema import EpisodeBatch, PredictiveBundle
-
 
 ACTIVE_CONFIG_PATH = ROOT / "workspace" / "active_config.json"
 
@@ -57,14 +55,6 @@ class ResearchConfig:
 
 
 RESEARCH = ResearchConfig()
-
-
-def load_active_config() -> ExperimentConfig:
-    if not ACTIVE_CONFIG_PATH.exists():
-        raise SystemExit(f"Missing {ACTIVE_CONFIG_PATH}. Run `python prepare.py` first.")
-    return ExperimentConfig.from_json(ACTIVE_CONFIG_PATH)
-
-
 def weighted_features(episode: EpisodeBatch, knobs: ResearchConfig) -> np.ndarray:
     return np.concatenate(
         [
@@ -272,36 +262,13 @@ def build_predictive_bundle(
 ) -> PredictiveBundle | None:
     if knobs.retrieval_mode != "chunk_world_model" and not knobs.use_world_model and not knobs.use_chunk_decoder:
         return None
-
-    wm_states, wm_actions, wm_next, wm_instability, wm_progress = build_world_model_data(
-        train_episodes, instability_threshold=config.instability_threshold
-    )
-    chunk_states, chunk_inputs, chunk_targets = build_chunk_decoder_data(
-        train_episodes,
-        chunk_len=knobs.chunk_len,
-        instability_threshold=config.instability_threshold,
-    )
-    return PredictiveBundle(
-        dynamics_model=train_world_model(
-            states=wm_states,
-            actions=wm_actions,
-            next_states=wm_next,
-            instability=wm_instability,
-            progress=wm_progress,
-            epochs=knobs.world_model_epochs,
-            batch_size=knobs.batch_size,
-            lr=knobs.learning_rate,
-            device=device,
-        ),
-        chunk_decoder=train_chunk_decoder(
-            state_inputs=chunk_states,
-            chunk_inputs=chunk_inputs,
-            targets=chunk_targets,
-            epochs=max(6, knobs.world_model_epochs),
-            batch_size=knobs.batch_size,
-            lr=knobs.learning_rate,
-            device=device,
-        ),
+    return build_predictive_bundle(
+        train_episodes=train_episodes,
+        config=config,
+        world_model_epochs=knobs.world_model_epochs,
+        batch_size=knobs.batch_size,
+        learning_rate=knobs.learning_rate,
+        device=device,
     )
 
 
@@ -316,12 +283,11 @@ def main() -> None:
     config.learning_rate = RESEARCH.learning_rate
     config.rerank_margin = RESEARCH.rerank_margin
 
-    set_seed(config.seed)
     if not torch.cuda.is_available():
         raise SystemExit("CUDA GPU required for this autoresearch run.")
     device = torch.device("cuda")
 
-    env, train_episodes, test_episodes = load_episodes(config)
+    env, train_episodes, test_episodes = load_runtime(config)
     memories = build_custom_memories(train_episodes, RESEARCH)
     banks = build_custom_banks(memories)
     predictive_bundle = build_predictive_bundle(train_episodes, config, RESEARCH, device)
