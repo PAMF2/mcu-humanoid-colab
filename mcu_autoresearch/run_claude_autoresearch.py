@@ -10,7 +10,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AUTORESEARCH = ROOT / "mcu_autoresearch"
 BOOTSTRAP = AUTORESEARCH / "bootstrap.py"
-PROMPT_FILE = AUTORESEARCH / "agent_prompt.md"
 LAST_MESSAGE = AUTORESEARCH / "workspace" / "claude_last_message.txt"
 
 
@@ -47,24 +46,19 @@ def ensure_branch(tag: str) -> str:
 
 
 def build_prompt(branch: str) -> str:
-    prompt = PROMPT_FILE.read_text(encoding="utf-8").strip()
-    return f"""{prompt}
-
-Work on branch `{branch}`.
-The baseline has already been executed by bootstrap.py.
-
-Now continue autonomous experimentation immediately.
-
-Hard rules:
-- Only edit `mcu_autoresearch/train.py`
-- Do not modify benchmark code, datasets, or evaluation harness
-- After each edit, run `python mcu_autoresearch/train.py > mcu_autoresearch/run.log 2>&1`
-- Then run `python mcu_autoresearch/log_result.py --status keep --description "<short description>"` or `--status discard`
-- Run multiple iterations, not just one
-- Optimize `primary_metric` downward
-
-At the very end, print a short plain-text summary of what you changed and the best metric found.
-"""
+    return (
+        "Read mcu_autoresearch/program.md. "
+        "Work only in this repository. "
+        f"Work on branch {branch}. "
+        "The baseline has already been executed by bootstrap.py. "
+        "Only edit mcu_autoresearch/train.py. "
+        "Do not change benchmark code, datasets, or evaluation harness. "
+        "Run an autonomous research loop with multiple iterations. "
+        "After each edit, run python mcu_autoresearch/train.py > mcu_autoresearch/run.log 2>&1. "
+        "Then run python mcu_autoresearch/log_result.py with keep or discard based on primary_metric. "
+        "Optimize primary_metric downward. "
+        "At the end, print a short summary with the best metric found."
+    )
 
 
 def main() -> None:
