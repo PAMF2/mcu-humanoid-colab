@@ -20,6 +20,12 @@ This file is also consumed automatically by:
 python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
 ```
 
+and:
+
+```bash
+python mcu_autoresearch/run_claude_autoresearch.py --preset real-medium
+```
+
 If you want a more explicit kickoff prompt, use:
 
 ```text

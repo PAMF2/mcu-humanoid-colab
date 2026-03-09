@@ -64,6 +64,12 @@ Or run the full Codex-driven loop in one command:
 python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
 ```
 
+Or run the full Claude Code-driven loop in one command:
+
+```bash
+python mcu_autoresearch/run_claude_autoresearch.py --preset real-medium
+```
+
 Only `mcu_autoresearch/train.py` should be edited by the agent.
 `mcu_autoresearch/workspace/` is ignored by git so setup does not dirty the branch.
 
@@ -119,4 +125,10 @@ If you already have Codex CLI configured locally, skip the manual prompt handoff
 
 ```bash
 python mcu_autoresearch/run_codex_autoresearch.py --preset real-medium
+```
+
+If you want Claude Code instead, use:
+
+```bash
+python mcu_autoresearch/run_claude_autoresearch.py --preset real-medium
 ```
