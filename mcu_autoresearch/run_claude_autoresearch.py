@@ -69,6 +69,8 @@ def main() -> None:
         "-p",
         "--permission-mode",
         "auto",
+        "--allowedTools",
+        "Read,Edit,Bash(git:*),Bash(python:*),Bash(ls:*),Bash(cat:*),Bash(tail:*)",
     ]
     if args.model:
         cmd.extend(["--model", args.model])
