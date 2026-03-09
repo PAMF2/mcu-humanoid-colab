@@ -68,7 +68,7 @@ def main() -> None:
         "claude",
         "-p",
         "--permission-mode",
-        "acceptEdits",
+        "auto",
     ]
     if args.model:
         cmd.extend(["--model", args.model])
