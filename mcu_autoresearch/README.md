@@ -52,6 +52,12 @@ python mcu_autoresearch/train.py > mcu_autoresearch/run.log 2>&1
 python mcu_autoresearch/log_result.py --status keep --description "baseline multimodal instant"
 ```
 
+Or do setup + baseline in one shot:
+
+```bash
+python mcu_autoresearch/bootstrap.py --preset real-medium
+```
+
 Only `mcu_autoresearch/train.py` should be edited by the agent.
 `mcu_autoresearch/workspace/` is ignored by git so setup does not dirty the branch.
 
@@ -90,3 +96,15 @@ The intended search space in `train.py` includes:
 - use of the tiny world model and chunk decoder
 
 This keeps the autoresearch loop aligned with the actual MCU claim instead of drifting into unrelated code changes.
+
+## Agent handoff
+
+Files intended for direct agent use:
+
+- `mcu_autoresearch/program.md`
+- `mcu_autoresearch/agent_prompt.md`
+
+The shortest path is:
+
+1. run `python mcu_autoresearch/bootstrap.py --preset real-medium`
+2. paste the prompt from `mcu_autoresearch/agent_prompt.md` into the agent
