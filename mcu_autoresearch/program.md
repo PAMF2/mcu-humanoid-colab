@@ -147,8 +147,12 @@ LOOP FOREVER:
    - `python mcu_autoresearch/log_result.py --status keep --description "<short note>"`
    - `python mcu_autoresearch/log_result.py --status discard --description "<short note>"`
    - `python mcu_autoresearch/log_result.py --status crash --description "<short note>"`
-8. Keep the commit only if `primary_metric` improved.
-9. Otherwise discard and continue.
+8. Also append one plain-text progress line to `mcu_autoresearch/progress.log`:
+   - format: `iteration<TAB>status<TAB>primary_metric<TAB>note`
+   - example: `3\tkeep\t0.301234\ttop_k=16 improved`
+   - also print a short line like `ITERATION 3 keep 0.301234 top_k=16 improved`
+9. Keep the commit only if `primary_metric` improved.
+10. Otherwise discard and continue.
 
 Do not stop to summarize the codebase.
 Do not stop after one experiment.
