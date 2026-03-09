@@ -1,0 +1,79 @@
+# MCU Autoresearch
+
+`mcu_autoresearch` adapts the `autoresearch` pattern to the MCU benchmark in this repository.
+
+The contract is intentionally narrow:
+
+- `prepare.py` is fixed and should not be modified by the agent.
+- `train.py` is the single editable file. It defines the candidate MCU controller and its search knobs.
+- `program.md` is the agent instruction file for autonomous experimentation.
+
+This setup uses the existing benchmark implementation in `../src/mcu_humanoid_colab/` and keeps the experiment loop lightweight:
+
+- choose a benchmark preset or config
+- run one candidate controller
+- report a compact summary
+- log the result in `results.tsv`
+
+## Quick start
+
+From the repository root:
+
+```bash
+python mcu_autoresearch/prepare.py --preset real-medium
+python mcu_autoresearch/train.py
+```
+
+That creates:
+
+- `mcu_autoresearch/workspace/active_config.json`
+- `mcu_autoresearch/results.tsv`
+
+## Available presets
+
+- `synthetic-smoke`
+- `synthetic-default`
+- `real-sample`
+- `real-medium`
+
+You can also point directly at an existing config:
+
+```bash
+python mcu_autoresearch/prepare.py --config sample_data/libero_real_medium_config.json
+```
+
+## Output
+
+`train.py` prints a summary block like:
+
+```text
+---
+primary_metric:    0.123456
+action_mse:        0.123456
+success_rate:      0.000000
+fall_rate:         0.000000
+training_seconds:  12.3
+peak_vram_mb:      512.0
+num_train_episodes: 76
+num_test_episodes: 20
+```
+
+Lower `primary_metric` is better.
+
+For offline datasets this is just `action_mse`.
+For synthetic runs it adds a small penalty for falls and a small bonus for success:
+
+`primary_metric = action_mse + 0.5 * fall_rate - 0.25 * success_rate`
+
+## Search space
+
+The intended search space in `train.py` includes:
+
+- query weights for `vision`, `proprio`, `contact`, `phase`, `command`
+- instant vs chunk retrieval
+- `top_k`
+- chunk aggregation strategy
+- rerank weights
+- use of the tiny world model and chunk decoder
+
+This keeps the autoresearch loop aligned with the actual MCU claim instead of drifting into unrelated code changes.
