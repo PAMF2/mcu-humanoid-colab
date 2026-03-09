@@ -84,8 +84,11 @@ Rules:
 1. Edit `mcu_autoresearch/train.py`
 2. Commit
 3. Run: `python mcu_autoresearch/train.py > run.log 2>&1`
-4. Extract metrics from `run.log`
-5. Update `mcu_autoresearch/results.tsv`
+4. Extract metrics from `mcu_autoresearch/run.log`
+5. Append to the log with:
+   - `python mcu_autoresearch/log_result.py --status keep --description "<short note>"`
+   - `python mcu_autoresearch/log_result.py --status discard --description "<short note>"`
+   - `python mcu_autoresearch/log_result.py --status crash --description "<short note>"`
 6. Keep or discard the commit based on `primary_metric`
 
 Keep the loop narrow and data-driven.

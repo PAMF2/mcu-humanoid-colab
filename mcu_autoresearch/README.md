@@ -42,6 +42,19 @@ You can also point directly at an existing config:
 python mcu_autoresearch/prepare.py --config sample_data/libero_real_medium_config.json
 ```
 
+## Autoresearch loop
+
+This folder is meant to be driven exactly like `autoresearch`:
+
+```bash
+python mcu_autoresearch/prepare.py --preset real-medium
+python mcu_autoresearch/train.py > mcu_autoresearch/run.log 2>&1
+python mcu_autoresearch/log_result.py --status keep --description "baseline multimodal instant"
+```
+
+Only `mcu_autoresearch/train.py` should be edited by the agent.
+`mcu_autoresearch/workspace/` is ignored by git so setup does not dirty the branch.
+
 ## Output
 
 `train.py` prints a summary block like:
